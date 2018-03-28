@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Plugin.Fingerprint.Abstractions
@@ -48,6 +49,36 @@ namespace Plugin.Fingerprint.Abstractions
         /// <param name="cancellationToken">Token used to cancel the operation.</param>
         /// <returns>Authentication result</returns>
         Task<FingerprintAuthenticationResult> AuthenticateAsync(AuthenticationRequestConfiguration authRequestConfig, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Requests the authentication.
+        /// </summary>
+        /// <param name="reason">Reason for the fingerprint authentication request. Displayed to the user.</param>
+        /// <param name="cancellationToken">Token used to cancel the operation.</param>
+        /// <returns>Secure Authentication result</returns>
+        Task<SecureFingerprintAuthenticationResult> AuthenticateSecureAsync(string reason, string key, CancellationToken cancellationToken = default);
+        /// <summary>
+        /// Requests the authentication.
+        /// </summary>
+        /// <param name="authRequestConfig">Configuration of the dialog that is displayed to the user.</param>
+        /// <param name="cancellationToken">Token used to cancel the operation.</param>
+        /// <returns>Secure Authentication Result</returns>
+        Task<SecureFingerprintAuthenticationResult> AuthenticateSecureAsync(AuthenticationRequestConfiguration authRequestConfig, string key, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Adds the secure data async.
+        /// </summary>
+        /// <returns>The secure data async.</returns>
+        /// <param name="key">Key.</param>
+        /// <param name="value">Value.</param>
+        Task<bool> AddSecureDataAsync(string key, string value);
+
+        /// <summary>
+        /// Removes the secure data async.
+        /// </summary>
+        /// <returns>The secure data async.</returns>
+        /// <param name="key">Key.</param>
+        Task<bool> RemoveSecureDataAsync(string key);
 
         /// <summary>
         /// Gets the available authentication type.

@@ -1,12 +1,13 @@
 using System;
+
 using Android.App;
 using Android.OS;
 using Android.Runtime;
 using Plugin.CurrentActivity;
-using Plugin.Fingerprint;
 
 namespace SMS.Fingerprint.Sample.Droid
 {
+	//You can specify additional application information in this attribute
     [Application]
     public class MainApplication : Application, Application.IActivityLifecycleCallbacks
     {
@@ -19,11 +20,7 @@ namespace SMS.Fingerprint.Sample.Droid
         {
             base.OnCreate();
             RegisterActivityLifecycleCallbacks(this);
-            
-            CrossFingerprint.SetCurrentActivityResolver(() => CrossCurrentActivity.Current.Activity);
-
-            // uncomment this line to use custom dialog
-            //CrossFingerprint.SetDialogFragmentType<MyCustomDialogFragment>();
+            //A great place to initialize Xamarin.Insights and Dependency Services!
         }
 
         public override void OnTerminate()

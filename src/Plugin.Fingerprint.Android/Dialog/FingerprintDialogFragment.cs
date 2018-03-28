@@ -19,14 +19,17 @@ namespace Plugin.Fingerprint.Dialog
     public class FingerprintDialogFragment : DialogFragment, IAuthenticationFailedListener, IDialogInterfaceOnKeyListener
     {
         private TaskCompletionSource<FingerprintAuthenticationResult> _resultTaskCompletionSource;
+        private TaskCompletionSource<SecureFingerprintAuthenticationResult> _secureResultTaskCompletionSource;
         private TextView _helpText;
         private Button _cancelButton;
         private Button _fallbackButton;
         private ImageView _icon;
         private bool _canceledByLifecycle;
+        private bool _useSecure;
         private CancellationTokenSource _cancelationTokenSource;
-        private IAndroidFingerprintImplementation _implementation;
+        private string _key;
 
+        private IAndroidFingerprintImplementation _implementation;
         protected Color? DefaultColor;
         protected Color NegativeColor = new Color(217, 59, 59);
         protected Color PositiveColor = new Color(90, 185, 83);
@@ -100,9 +103,11 @@ namespace Plugin.Fingerprint.Dialog
         {
             Configuration = config;
             _implementation = implementation;
+            _useSecure = false;
+            _resultTaskCompletionSource = new TaskCompletionSource<FingerprintAuthenticationResult>();
 
             var currentActivity = CrossFingerprint.CurrentActivity;
-            Show(currentActivity.FragmentManager, "fingerprint-fragment");
+            base.Show(currentActivity.FragmentManager, "fingerprint-fragment");
 
             using (cancellationToken.Register(OnExternalCancel))
             {
@@ -110,10 +115,20 @@ namespace Plugin.Fingerprint.Dialog
             }
         }
 
-        public override void Show(FragmentManager manager, string tag)
+        public async Task<SecureFingerprintAuthenticationResult> ShowSecureAsync(AuthenticationRequestConfiguration config, string key, IAndroidFingerprintImplementation implementation, CancellationToken cancellationToken)
         {
-            _resultTaskCompletionSource = new TaskCompletionSource<FingerprintAuthenticationResult>();
-            base.Show(manager, tag);
+            Configuration = config;
+            _implementation = implementation;
+            _useSecure = true;
+            _key = key;
+            _secureResultTaskCompletionSource = new TaskCompletionSource<SecureFingerprintAuthenticationResult>();
+            var currentActivity = CrossFingerprint.CurrentActivity;
+            base.Show(currentActivity.FragmentManager, "fingerprint-fragment");
+
+            using (cancellationToken.Register(OnExternalCancel))
+            {
+                return await _secureResultTaskCompletionSource.Task;
+            }
         }
 
         protected void DetachEventHandlers()
@@ -134,10 +149,20 @@ namespace Plugin.Fingerprint.Dialog
             _canceledByLifecycle = true;
             _cancelationTokenSource?.Cancel();
 
-            Dismiss(new FingerprintAuthenticationResult
+            if (_useSecure)
             {
-                Status = status
-            }, animation);
+                Dismiss(new SecureFingerprintAuthenticationResult
+                {
+                    Status = status
+                }, animation);
+            }
+            else
+            {
+                Dismiss(new FingerprintAuthenticationResult
+                {
+                    Status = status
+                }, animation);
+            }
         }
 
         private async void Dismiss(FingerprintAuthenticationResult result, bool animation = true)
@@ -150,6 +175,19 @@ namespace Plugin.Fingerprint.Dialog
             }
 
             _resultTaskCompletionSource.TrySetResult(result);
+            DismissAllowingStateLoss();
+        }
+
+        private async void Dismiss(SecureFingerprintAuthenticationResult result, bool animation = true)
+        {
+            DetachEventHandlers();
+            if (animation)
+            {
+                HideHelpText();
+                await AnimateResultAsync(result.Status);
+            }
+
+            _secureResultTaskCompletionSource.TrySetResult(result);
             DismissAllowingStateLoss();
         }
 
@@ -186,13 +224,25 @@ namespace Plugin.Fingerprint.Dialog
             _cancelationTokenSource = new CancellationTokenSource();
             _canceledByLifecycle = false;
 
-            var result = await _implementation.AuthenticateNoDialogAsync(this, _cancelationTokenSource.Token);
-
-            if (!_canceledByLifecycle)
+            if (_useSecure)
             {
-                _cancelationTokenSource = null;
-                Dismiss(result);
+                var secResult = await _implementation.AuthenticateSecureNoDialogAsync(this,_key, _cancelationTokenSource.Token);
+                if (!_canceledByLifecycle)
+                {
+                    _cancelationTokenSource = null;
+                    Dismiss(secResult);
+                }
             }
+            else
+            {
+                var result = await _implementation.AuthenticateNoDialogAsync(this, _cancelationTokenSource.Token);
+                if (!_canceledByLifecycle)
+                {
+                    _cancelationTokenSource = null;
+                    Dismiss(result);
+                }
+            }
+
         }
 
         private void OnCancel(object sender, EventArgs e)

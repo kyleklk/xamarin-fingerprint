@@ -51,8 +51,6 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Runtime" />
-    <Reference Include="System.Threading.Tasks" />
     <Reference Include="Xamarin.Mac" />
   </ItemGroup>
   <ItemGroup>
@@ -70,9 +68,9 @@
     <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Plugin.Fingerprint.Abstractions.Mac\Plugin.Fingerprint.Abstractions.Mac.csproj">
-      <Project>{1611b039-42b7-463f-bea4-72867a924154}</Project>
-      <Name>Plugin.Fingerprint.Abstractions.Mac</Name>
+    <ProjectReference Include="..\Plugin.Fingerprint.Abstractions\Plugin.Fingerprint.Abstractions.csproj">
+      <Project>{9E635804-0422-40BB-8F5C-303853A9CE3D}</Project>
+      <Name>Plugin.Fingerprint.Abstractions</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Mac\Xamarin.Mac.CSharp.targets" />

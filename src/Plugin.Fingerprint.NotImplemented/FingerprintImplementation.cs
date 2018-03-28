@@ -24,5 +24,24 @@ namespace Plugin.Fingerprint
                 ErrorMessage = "Not implemented for the current platform."
             });
         }
+
+        public override Task<SecureFingerprintAuthenticationResult> NativeSecureAuthenticateAsync(AuthenticationRequestConfiguration authRequestConfig,string key, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(new SecureFingerprintAuthenticationResult
+            {
+                Status = FingerprintAuthenticationResultStatus.NotAvailable,
+                ErrorMessage = "Not implemented for the current platform."
+            });
+        }
+
+        public override Task<bool> AddSecureDataAsync(string key, string value)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override Task<bool> RemoveSecureDataAsync(string key)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

@@ -7,5 +7,7 @@ namespace Plugin.Fingerprint.Contract
     public interface IAndroidFingerprintImplementation
     {
         Task<FingerprintAuthenticationResult> AuthenticateNoDialogAsync(IAuthenticationFailedListener failedListener, CancellationToken cancellationToken);
+
+        Task<SecureFingerprintAuthenticationResult> AuthenticateSecureNoDialogAsync(IAuthenticationFailedListener failedListener, string key, CancellationToken cancellationToken);
     }
 }

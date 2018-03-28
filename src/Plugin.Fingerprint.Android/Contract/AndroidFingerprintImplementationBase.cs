@@ -20,7 +20,20 @@ namespace Plugin.Fingerprint.Contract
             return await AuthenticateNoDialogAsync(new DeafAuthenticationFailedListener(), cancellationToken);
         }
 
+        public override async Task<SecureFingerprintAuthenticationResult> NativeSecureAuthenticateAsync(AuthenticationRequestConfiguration authRequestConfig,string key, CancellationToken cancellationToken)
+        {
+            if (authRequestConfig.UseDialog)
+            {
+                var fragment = CrossFingerprint.CreateDialogFragment();
+                return await fragment.ShowSecureAsync(authRequestConfig, key,this, cancellationToken);
+            }
+
+            return await AuthenticateSecureNoDialogAsync(new DeafAuthenticationFailedListener(), key, cancellationToken);
+        }
+
         public abstract Task<FingerprintAuthenticationResult> AuthenticateNoDialogAsync(IAuthenticationFailedListener failedListener, CancellationToken cancellationToken);
+
+        public abstract Task<SecureFingerprintAuthenticationResult> AuthenticateSecureNoDialogAsync(IAuthenticationFailedListener failedListener,string key, CancellationToken cancellationToken);
 
         public override async Task<AuthenticationType> GetAuthenticationTypeAsync()
         {
@@ -34,5 +47,6 @@ namespace Plugin.Fingerprint.Contract
 
             return AuthenticationType.None;
         }
+
     }
 }

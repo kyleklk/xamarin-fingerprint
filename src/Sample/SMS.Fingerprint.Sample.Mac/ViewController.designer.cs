@@ -1,6 +1,6 @@
 // WARNING
 //
-// This file has been generated automatically by Xamarin Studio to store outlets and
+// This file has been generated automatically by Visual Studio to store outlets and
 // actions made in the UI designer. If it is removed, they will be lost.
 // Manual changes to this file may not be handled correctly.
 //
@@ -13,10 +13,13 @@ namespace SMS.Fingerprint.Sample.Mac
 	partial class ViewController
 	{
 		[Outlet]
+		AppKit.NSButton btnAdd { get; set; }
+
+		[Outlet]
 		AppKit.NSButton btnAuthenticate { get; set; }
 
 		[Outlet]
-		AppKit.NSButton btnAuthenticateLocalized { get; set; }
+		AppKit.NSButton btnRemove { get; set; }
 
 		[Outlet]
 		AppKit.NSTextField lblStatus { get; set; }
@@ -24,11 +27,17 @@ namespace SMS.Fingerprint.Sample.Mac
 		[Outlet]
 		AppKit.NSButton swAutoCancel { get; set; }
 
+		[Action ("AddClicked:")]
+		partial void AddClicked (AppKit.NSButton sender);
+
 		[Action ("AuthenticateClicked:")]
 		partial void AuthenticateClicked (AppKit.NSButton sender);
 
 		[Action ("AuthenticateLocalizedClicked:")]
 		partial void AuthenticateLocalizedClicked (AppKit.NSButton sender);
+
+		[Action ("RemoveClicked:")]
+		partial void RemoveClicked (AppKit.NSButton sender);
 		
 		void ReleaseDesignerOutlets ()
 		{
@@ -37,9 +46,14 @@ namespace SMS.Fingerprint.Sample.Mac
 				btnAuthenticate = null;
 			}
 
-			if (btnAuthenticateLocalized != null) {
-				btnAuthenticateLocalized.Dispose ();
-				btnAuthenticateLocalized = null;
+			if (btnRemove != null) {
+				btnRemove.Dispose ();
+				btnRemove = null;
+			}
+
+			if (btnAdd != null) {
+				btnAdd.Dispose ();
+				btnAdd = null;
 			}
 
 			if (lblStatus != null) {

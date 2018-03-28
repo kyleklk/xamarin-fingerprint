@@ -8,4 +8,9 @@ namespace Plugin.Fingerprint.Contract
     {
         Task<FingerprintAuthenticationResult> GetTask();
     }
+
+    public interface ISecureAuthenticationCallback : IDisposable
+    {
+        Task<SecureFingerprintAuthenticationResult> GetTask();
+    }
 }

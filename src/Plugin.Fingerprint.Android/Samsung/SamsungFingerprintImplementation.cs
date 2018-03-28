@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Android.App;
 using Android.Util;
@@ -120,6 +121,21 @@ namespace Plugin.Fingerprint.Samsung
             }
 
             return FingerprintAvailability.Available;
+        }
+
+        public override Task<bool> AddSecureDataAsync(string key, string value)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override Task<bool> RemoveSecureDataAsync(string key)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override Task<SecureFingerprintAuthenticationResult> AuthenticateSecureNoDialogAsync(IAuthenticationFailedListener failedListener,string key, CancellationToken cancellationToken)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

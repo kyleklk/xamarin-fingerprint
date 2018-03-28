@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using CoreFoundation;
 using Foundation;
 using LocalAuthentication;
 using ObjCRuntime;
 using Plugin.Fingerprint.Abstractions;
+using Security;
 #if !__MAC__
 using UIKit;
 #endif
@@ -206,6 +209,110 @@ namespace Plugin.Fingerprint
                 return;
 
             _context = new LAContext();
+        }
+
+        public override Task<bool> AddSecureDataAsync(string key, string value)
+        {
+            var secObject = new SecAccessControl(SecAccessible.WhenPasscodeSetThisDeviceOnly, SecAccessControlCreateFlags.TouchIDCurrentSet);
+
+            if (secObject == null)
+            {
+                //handle error
+            }
+
+            var securityRecord = new SecRecord(SecKind.Key)
+            {
+                Service = key,
+                ValueData = new NSString(value).Encode(NSStringEncoding.UTF8),
+                AccessControl = secObject
+            };
+
+            TaskCompletionSource<bool> response = new TaskCompletionSource<bool>();
+
+            DispatchQueue.MainQueue.DispatchAsync(() =>
+            {
+                SecStatusCode status = SecKeyChain.Add(securityRecord);
+                if (status == SecStatusCode.Success)
+                {
+                    response.TrySetResult(true);
+                }
+                else
+                {
+                    throw new Exception(status.ToString());
+                }
+            });
+            return response.Task;
+        }
+
+        public override Task<bool> RemoveSecureDataAsync(string key)
+        {
+            TaskCompletionSource<bool> response = new TaskCompletionSource<bool>();
+            var securityRecord = new SecRecord(SecKind.GenericPassword)
+            {
+                Service = key
+            };
+
+            DispatchQueue.MainQueue.DispatchAsync(() => {
+
+                var status = SecKeyChain.Remove(securityRecord);
+
+                if(status == SecStatusCode.Success)
+                {
+                    response.TrySetResult(true);
+                }
+                else
+                {
+                    throw new Exception(status.ToString());
+                }
+            });
+            return response.Task;
+        }
+
+        public override Task<SecureFingerprintAuthenticationResult> NativeSecureAuthenticateAsync(AuthenticationRequestConfiguration authRequestConfig, string key,CancellationToken cancellationToken)
+        {
+            TaskCompletionSource<SecureFingerprintAuthenticationResult> response = new TaskCompletionSource<SecureFingerprintAuthenticationResult>();
+            var securityRecord = new SecRecord(SecKind.GenericPassword)
+            {
+                Service = key
+            };
+
+            DispatchQueue.MainQueue.DispatchAsync(() =>
+            {
+                SecStatusCode status;
+                NSData resultData = SecKeyChain.QueryAsData(securityRecord, false, out status);
+
+                var result = resultData != null ? new NSString(resultData, NSStringEncoding.UTF8) : "";
+                var secResponse = new SecureFingerprintAuthenticationResult()
+                {
+                    ErrorMessage = "",
+                    SecureData = new Dictionary<string, string>{ { key, result } },
+                    Status = MapStatus(status)
+                };
+
+                if(status == SecStatusCode.VerifyFailed)
+                {
+                    //Todo: check if this is the correct status code when a finger print has been added or removed
+                    throw new FingerprintStoreInvalidatedException();
+                }
+
+            });
+
+            return response.Task;
+        }
+
+        private FingerprintAuthenticationResultStatus MapStatus(SecStatusCode code)
+        {
+            switch(code)
+            {
+                //TODO: add remining status codes
+                case SecStatusCode.AuthFailed:
+                    return FingerprintAuthenticationResultStatus.Failed;
+                case SecStatusCode.Success:
+                    return FingerprintAuthenticationResultStatus.Succeeded;
+                default:
+                    return FingerprintAuthenticationResultStatus.Unknown;
+            }
+
         }
     }
 }
