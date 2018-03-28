@@ -217,7 +217,7 @@ namespace Plugin.Fingerprint
 
             if (secObject == null)
             {
-                //handle error
+                //todo:handle error
             }
 
             var securityRecord = new SecRecord(SecKind.Key)

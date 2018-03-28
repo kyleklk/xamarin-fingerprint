@@ -45,7 +45,7 @@ namespace Plugin.Fingerprint.Utils
             {
                 cipher.Init(CipherMode.EncryptMode | CipherMode.DecryptMode, key);
             }
-            catch (KeyPermanentlyInvalidatedException e)
+            catch (KeyPermanentlyInvalidatedException)
             {
                 _keystore.DeleteEntry(KEY_NAME);
                 throw new FingerprintStoreInvalidatedException();
